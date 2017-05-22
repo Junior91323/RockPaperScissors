@@ -13,7 +13,7 @@ namespace RockPaperScissors.Infrastructure.Options
             Papper = 2,
             Scissors = 3
         }
-        public enum Bet
+        public enum BET
         {
             Lose,
             Win,

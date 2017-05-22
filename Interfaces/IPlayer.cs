@@ -11,7 +11,8 @@ namespace RockPaperScissors.Interfaces
     {
         string Name { get;}
         ITeam Team { get; set; }
-        Bet Status { get; set; }
+        BET Status { get; set; }
+        RPS Result { get;}
         RPS Play();
     }
 }

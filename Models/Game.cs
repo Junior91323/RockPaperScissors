@@ -23,7 +23,8 @@ namespace RockPaperScissors.Models
         CancellationToken Token { get; set; }
 
 
-        public event StartRoundDelegate StartRoundHandler;
+        public event StartRoundHandler StartGameHandler;
+        public event EventHandler FinishGameHandler;
 
         public List<ICouple> Couples
         {
@@ -74,10 +75,8 @@ namespace RockPaperScissors.Models
 
         public Game(int teamLength, int winLength)
         {
-
-
             _Team1 = new Team("Team1");
-            _Team1 = new Team("Team2");
+            _Team2 = new Team("Team2");
 
             FillTeam(Team1, teamLength);
             FillTeam(Team2, teamLength);
@@ -106,21 +105,31 @@ namespace RockPaperScissors.Models
                 args.Token = Token;
                 args.CancelTokenSource = CancelTokenSource;
                 args.WinLength = WinLength;
-                StartRoundHandler?.Invoke(this, args);
+
+                StartGameHandler?.Invoke(this, args);
 
                 Task.WaitAll(TaskPool.ToArray(), Token);
-
-                //Console.ForegroundColor = ConsoleColor.Green;
-                //Console.WriteLine("{0} : {1} ---- {2} : {3}", Team1.Name, Team1.Count, Team2.Name, Team2.Count);
+            }
+            catch (OperationCanceledException ex)
+            {
+                //throw new Exception("Stop game");
             }
             catch (Exception ex)
             {
-
+                throw new Exception("Start game exception", ex.InnerException);
             }
             finally
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("{0} : {1} ---- {2} : {3}", Team1.Name, Team1.Count, Team2.Name, Team2.Count);
+                if (FinishGameHandler != null)
+                {
+                    FinishGameHandler.Invoke(this, new System.EventArgs());
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("{0} : {1} ---- {2} : {3}", Team1.Name, Team1.Count, Team2.Name, Team2.Count);
+                    Console.WriteLine("End GAME!!!");
+                }
             }
         }
         void Init(int players, int wins)
@@ -133,7 +142,7 @@ namespace RockPaperScissors.Models
             for (int i = 0; i < _TeamLength; i++)
             {
                 ICouple couple = new Couple(Team1.Players[i], Team2.Players[i]);
-                StartRoundHandler += couple.StartEvent;
+                StartGameHandler += couple.StartEvent;
                 Couples.Add(couple);
             }
 
@@ -145,7 +154,7 @@ namespace RockPaperScissors.Models
         {
             for (int i = 0; i < count; i++)
             {
-                IPlayer item = new Player(String.Format("Player{0}_Team{1}", i, team.Name));
+                IPlayer item = new Player(String.Format("Player{0}_{1}", i, team.Name));
                 team.AddPlayer(item);
             }
         }

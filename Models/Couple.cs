@@ -32,69 +32,78 @@ namespace RockPaperScissors.Models
 
         public void StartEvent(object sender, StartRoundEventArgs args)
         {
-            if (args != null && args.TaskPool != null)
+            try
             {
-                args.TaskPool.Add(Task.Factory.StartNew(() =>
+                if (args != null && args.TaskPool != null)
                 {
-                    lock (_SyncLock)
+                    args.TaskPool.Add(Task.Factory.StartNew(() =>
                     {
-                        if (args.Token != null && !args.Token.IsCancellationRequested)
+                        lock (_SyncLock)
                         {
-                            RPS firstPlayerRes = FirstPlayer.Play();
-                            RPS secondPlayerRes = SecondPlayer.Play();
 
-                            FirstPlayer.Status = CheckWin((Int32)firstPlayerRes, (Int32)secondPlayerRes);
-
-                            switch (FirstPlayer.Status)
+                            if (args.Token != null && !args.Token.IsCancellationRequested)
                             {
-                                case Bet.Win: FirstPlayer.Team.Count++; break;
-                                case Bet.Lose: SecondPlayer.Team.Count++; break;
-                            }
-                            
-                            Console.WriteLine("{0} : {1} --- {2} : {3}", FirstPlayer.Name, firstPlayerRes, SecondPlayer.Name, secondPlayerRes);
-                        }
+                                RPS firstPlayerRes = FirstPlayer.Play();
+                                RPS secondPlayerRes = SecondPlayer.Play();
 
-                        if (args.CancelTokenSource != null && (FirstPlayer.Team.Count >= args.WinLength || SecondPlayer.Team.Count >= args.WinLength))
-                            args.CancelTokenSource.Cancel();
-                    }
-                }));
+                                FirstPlayer.Status = CheckWin((Int32)firstPlayerRes, (Int32)secondPlayerRes);
+                                SecondPlayer.Status = CheckWin((Int32)secondPlayerRes, (Int32)firstPlayerRes);
+
+                                switch (FirstPlayer.Status)
+                                {
+                                    case BET.Win: FirstPlayer.Team.Count++; break;
+                                    case BET.Lose: SecondPlayer.Team.Count++; break;
+                                }
+
+                                //Console.WriteLine("{0} : {1} --- {2} : {3}", FirstPlayer.Name, firstPlayerRes, SecondPlayer.Name, secondPlayerRes);
+                            }
+
+                            if (args.CancelTokenSource != null && (FirstPlayer.Team.Count >= args.WinLength || SecondPlayer.Team.Count >= args.WinLength))
+                                args.CancelTokenSource.Cancel();
+                        }
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error playing in couple", ex.InnerException);
             }
         }
 
-        Bet CheckWin(int item, int value)
+        BET CheckWin(int item, int value)
         {
             switch (item)
             {
                 case (Int32)RPS.Rock:
                     if (value == (Int32)RPS.Rock)
-                        return Bet.Draw;
+                        return BET.Draw;
 
                     if (value == (Int32)RPS.Papper)
-                        return Bet.Lose;
+                        return BET.Lose;
 
                     if (value == (Int32)RPS.Scissors)
-                        return Bet.Win;
+                        return BET.Win;
 
                     break;
                 case (Int32)RPS.Papper:
                     if (value == (Int32)RPS.Rock)
-                        return Bet.Win;
+                        return BET.Win;
 
                     if (value == (Int32)RPS.Papper)
-                        return Bet.Draw;
+                        return BET.Draw;
 
                     if (value == (Int32)RPS.Scissors)
-                        return Bet.Lose;
+                        return BET.Lose;
                     break;
                 case (Int32)RPS.Scissors:
                     if (value == (Int32)RPS.Rock)
-                        return Bet.Lose;
+                        return BET.Lose;
 
                     if (value == (Int32)RPS.Papper)
-                        return Bet.Win;
+                        return BET.Win;
 
                     if (value == (Int32)RPS.Scissors)
-                        return Bet.Draw;
+                        return BET.Draw;
                     break;
             }
             return 0;

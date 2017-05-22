@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace RockPaperScissors.Infrastructure
 {
-    public delegate void StartRoundDelegate(object sender, StartRoundEventArgs args);
+    public delegate void StartRoundHandler(object sender, StartRoundEventArgs args);
 }

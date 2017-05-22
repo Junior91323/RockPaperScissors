@@ -13,6 +13,7 @@ namespace RockPaperScissors.Models
     {
         string _Name;
         ITeam _Team;
+        RPS _Result;
         static readonly Random _Random;
         static readonly object _SyncLock;
 
@@ -26,8 +27,15 @@ namespace RockPaperScissors.Models
             set { _Team = value; }
         }
 
-        public Bet Status { get; set; }
-        
+        public BET Status { get; set; }
+
+        public RPS Result
+        {
+            get
+            {
+                return _Result;
+            }
+        }
 
         static Player()
         {
@@ -42,9 +50,8 @@ namespace RockPaperScissors.Models
 
         public RPS Play()
         {
-            int res = 0;
-            res = RandomNumber(1, 4);
-            return ((RPS)res);
+            _Result = (RPS)RandomNumber(1, 4);
+            return (_Result);
         }
 
         private static int RandomNumber(int min, int max)

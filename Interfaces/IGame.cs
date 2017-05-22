@@ -18,6 +18,7 @@ namespace RockPaperScissors.Interfaces
         List<ICouple> Couples { get; }
         void Start();
 
-        event StartRoundDelegate StartRoundHandler;
+        event StartRoundHandler StartGameHandler;
+        event EventHandler FinishGameHandler;
     }
 }
